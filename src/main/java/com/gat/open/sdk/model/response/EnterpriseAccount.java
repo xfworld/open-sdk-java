@@ -1,4 +1,4 @@
-package com.gat.open.sdk.model;
+package com.gat.open.sdk.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,19 +6,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 
 /**
- * Created by xin.hua on 2017/7/18.
+ * @author xin.hua
+ * @date 2017/7/18
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnterpriseAccount {
-
-    /**
-     * account_openid : suw7l4W82D7+Eni2T7K+kw==
-     * balance : 77540391
-     * is_basic : 1
-     * name : 基本户
-     * status : 1
-     * type : 1
-     */
 
     @JsonProperty("account_openid")
     private String accountOpenid;

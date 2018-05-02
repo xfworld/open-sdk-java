@@ -1,4 +1,4 @@
-package com.gat.open.sdk.model;
+package com.gat.open.sdk.model.request;
 
 import java.math.BigDecimal;
 
@@ -7,27 +7,51 @@ import java.math.BigDecimal;
  * @version 1.0.0
  * @date 2017/12/18 20:07
  */
-public class Limit {
+public class LimitRecycle {
+
+    /**
+     * 必填: 额度标识
+     */
     private String limitOpenid;
+    /**
+     * 集团必填,企业不填: 公司编码
+     */
+    private String enterpriseCode;
+    /**
+     * 必填: 工号
+     */
     private String corpCode;
+    /**
+     * 必填: 额度金额
+     */
     private BigDecimal amount;
+    /**
+     * 必填: 回收原因
+     */
     private String remark;
-    private String comment;
+    /**
+     * 必填: 交易号
+     */
     private String externalCode;
 
-    public Limit() {
-    }
-
     public String getLimitOpenid() {
-        return this.limitOpenid;
+        return limitOpenid;
     }
 
     public void setLimitOpenid(String limitOpenid) {
         this.limitOpenid = limitOpenid;
     }
 
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
+
     public String getCorpCode() {
-        return this.corpCode;
+        return corpCode;
     }
 
     public void setCorpCode(String corpCode) {
@@ -35,7 +59,7 @@ public class Limit {
     }
 
     public BigDecimal getAmount() {
-        return this.amount;
+        return amount;
     }
 
     public void setAmount(BigDecimal amount) {
@@ -43,23 +67,15 @@ public class Limit {
     }
 
     public String getRemark() {
-        return this.remark;
+        return remark;
     }
 
     public void setRemark(String remark) {
         this.remark = remark;
     }
 
-    public String getComment() {
-        return this.comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
     public String getExternalCode() {
-        return this.externalCode;
+        return externalCode;
     }
 
     public void setExternalCode(String externalCode) {

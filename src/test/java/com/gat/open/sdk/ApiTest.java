@@ -1,64 +1,40 @@
 package com.gat.open.sdk;
 
-
 import com.gat.open.sdk.model.ApiResponse;
-import com.gat.open.sdk.model.Employee;
-import com.gat.open.sdk.model.EnterpriseAccount;
+import com.gat.open.sdk.model.Token;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
-import java.util.List;
+import java.io.UnsupportedEncodingException;
 
 /**
- * Created by xin.hua on 2017/7/20.
+ * @author Stanley Shen
+ * @version 1.0.0
+ * @date 2018/5/2 15:47
  */
 public class ApiTest extends TestCase {
 
-    private GATOpen gatOpen;
+    GATOpen gatOpen = new GATOpen("20110667", "a9d2cc6a4e8f58b50b8314644bdcc829", "https://openapi.guanaitong.cc");
 
-    protected void setUp() {
-        gatOpen = new GATOpen("20091181", "f915972094db1d42581eb805ca228b23", "https://openapi.guanaitong.com");
-    }
-
-    public void testToken() {
-        String token = gatOpen.createToken().getData().getAccessToken();
+    public void testCreateToken() {
+        ApiResponse<Token> token = gatOpen.createToken();
         Assert.assertNotNull(token);
-        Assert.assertNotNull(gatOpen.getTokenInfo(token).getData().getAccessToken());
+        Assert.assertNotNull(token.getData().getAccessToken());
+        System.out.println("token = " + token.getData().getAccessToken());
     }
 
-    public void testLogin() {
-        ApiResponse<String> result = gatOpen.loginByMobile("15250415236");
-        System.out.println(gatOpen.loginByCorpCode("6310"));
+    public void testLoginByCorpCode() {
+        ApiResponse<String> result = gatOpen.loginByCorpCode(null, "H002");
         Assert.assertNotNull(result);
-        System.out.println(result);
+        System.out.println("result = " + result.getData());
     }
 
-    public void testEmployee() {
-        ApiResponse<Employee> employee = gatOpen.getEmployee("M020005");
-        Assert.assertNotNull(employee);
-        System.out.println(gatOpen.batchEmployee(1, 14));
-        System.out.println(gatOpen.accountEmployee("OP020430"));
-        System.out.println(gatOpen.resignEmployee("OP020430"));
-        System.out.println(gatOpen.restoreEmployee("OP020430"));
-        System.out.println(gatOpen.getEmployee("OP020430"));
-        System.out.println(employee);
+    public void testLoginUrl() throws UnsupportedEncodingException {
+        ApiResponse<String> result = gatOpen.loginByCorpCode(null, "H002");
+        Assert.assertNotNull(result);
+        String url = gatOpen.loginUrl(result.getData(), null);
+        Assert.assertNotNull(url);
+        System.out.println("url = " + url);
     }
-
-    public void testEnterprise() {
-        ApiResponse<List<EnterpriseAccount>> account = gatOpen.enterpriseAccount(null, null);
-        System.out.println(gatOpen.limitStatus("1234"));
-        System.out.println(gatOpen.pointStatus("1234"));
-        Assert.assertNotNull(account);
-
-        System.out.println(gatOpen.enterpriseAccount("LnrfDJ8J1dHBrhFPOy9pBw==", 3));
-        System.out.println(account);
-    }
-
-    public void testHelper() {
-        ApiResponse<String> check = gatOpen.helperCheck("20110634");
-        Assert.assertNotNull(check);
-        System.out.println(check);
-    }
-
 
 }

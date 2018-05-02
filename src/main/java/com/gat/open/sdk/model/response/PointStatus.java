@@ -1,27 +1,23 @@
-package com.gat.open.sdk.model;
+package com.gat.open.sdk.model.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
 
 /**
- * Created by xin.hua on 2017/7/18.
+ * @author xin.hua
+ * @date 2017/7/18
  */
 public class PointStatus {
-
-
-    /**
-     * amount : 100
-     * corp_code : CJJ101
-     * externalCode : 300000031495071665668
-     * pointStatus : 2
-     * time_assign : 2017-05-18
-     */
 
     private BigDecimal amount;
     @JsonProperty("corp_code")
     private String corpCode;
     private String externalCode;
+
+    /**
+     * 1:失败;2:完成;3:取消;4:延时
+     */
     private int status;
     @JsonProperty("time_assign")
     private String timeAssign;

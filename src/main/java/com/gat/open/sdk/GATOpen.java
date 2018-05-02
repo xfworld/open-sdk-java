@@ -4,12 +4,20 @@ package com.gat.open.sdk;
 import com.gat.open.sdk.api.*;
 import com.gat.open.sdk.constant.GATOpenConstant;
 import com.gat.open.sdk.model.*;
-import com.gat.open.sdk.model.bo.EmployeeBO;
+import com.gat.open.sdk.model.request.*;
+import com.gat.open.sdk.model.response.Employee;
+import com.gat.open.sdk.model.response.EnterpriseAccount;
+import com.gat.open.sdk.model.response.LimitStatus;
+import com.gat.open.sdk.model.response.PointStatus;
+import com.gat.open.sdk.service.GATTokenService;
 import com.gat.open.sdk.util.CallUtil;
 import com.gat.open.sdk.util.RetrofitFactory;
+import com.gat.open.sdk.util.SignUtil;
+import com.gat.open.sdk.util.UrlBuildUtil;
 import retrofit2.Call;
 
-import java.math.BigDecimal;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,10 +43,10 @@ public class GATOpen {
     /**
      * 设置网络连接读取超时时间
      *
-     * @param connectTimeOut
-     * @param readTimeOut
-     * @param writeTimeOut
-     * @param debugHttpLog
+     * @param connectTimeOut 链接超时时间
+     * @param readTimeOut    写入超时时间
+     * @param writeTimeOut   读取超时时间
+     * @param debugHttpLog   是否打印记录debug日志
      */
     public void config(long connectTimeOut, long readTimeOut, long writeTimeOut, boolean debugHttpLog) {
         retrofitFactory.config(connectTimeOut, readTimeOut, writeTimeOut, debugHttpLog);
@@ -49,7 +57,7 @@ public class GATOpen {
     /**
      * 获取token
      *
-     * @return
+     * @return 返回access_token
      */
     public ApiResponse<Token> createToken() {
         TokenApi tokenApi = retrofitFactory.getApi(TokenApi.class);
@@ -60,12 +68,12 @@ public class GATOpen {
     /**
      * 查询token状态
      *
-     * @param access_token
-     * @return
+     * @param accessToken access_token
+     * @return token状态
      */
-    public ApiResponse<Token> getTokenInfo(String access_token) {
+    public ApiResponse<Token> getTokenInfo(String accessToken) {
         TokenApi tokenApi = retrofitFactory.getApi(TokenApi.class);
-        Call<ApiResponse<Token>> call = tokenApi.getTokenInfo(access_token, GATOpenConstant.appId);
+        Call<ApiResponse<Token>> call = tokenApi.getTokenInfo(accessToken, GATOpenConstant.appId);
         return CallUtil.execute(call);
     }
 
@@ -74,44 +82,36 @@ public class GATOpen {
     /**
      * 企业积分发放
      *
-     * @param corpCode
-     * @param amount
-     * @param reason
-     * @param externalCode
-     * @return
+     * @param pointAssign 积分发放
+     * @return 交易号
      */
-    public ApiResponse<String> pointAssign(String corpCode, BigDecimal amount,
-                                           String reason, String externalCode) {
+    public ApiResponse<String> pointAssign(PointAssign pointAssign) {
         EnterpriseApi enterpriseApi = retrofitFactory.getApi(EnterpriseApi.class);
-        Call<ApiResponse<String>> call = enterpriseApi
-                .pointAssign(corpCode, amount, reason, externalCode);
+        Call<ApiResponse<String>> call = enterpriseApi.pointAssign(pointAssign.getEnterpriseCode(),
+                pointAssign.getCorpCode(), pointAssign.getAccountOpenid(), pointAssign.getAmount(),
+                pointAssign.getReason(), pointAssign.getExternalCode());
         return CallUtil.execute(call);
     }
-
 
     /**
      * 企业积分回收
      *
-     * @param corpCode
-     * @param amount
-     * @param reason
-     * @param externalCode
-     * @return
+     * @param pointRecycle 积分回收
+     * @return 交易号
      */
-    public ApiResponse<String> pointRecycle(String corpCode,
-                                            BigDecimal amount, String reason,
-                                            String externalCode) {
+    public ApiResponse<String> pointRecycle(PointRecycle pointRecycle) {
         EnterpriseApi enterpriseApi = retrofitFactory.getApi(EnterpriseApi.class);
-        Call<ApiResponse<String>> call = enterpriseApi
-                .pointRecycle(corpCode, amount, reason, externalCode);
+        Call<ApiResponse<String>> call = enterpriseApi.pointRecycle(pointRecycle.getEnterpriseCode(),
+                pointRecycle.getCorpCode(), pointRecycle.getAmount(), pointRecycle.getReason(),
+                pointRecycle.getExternalCode());
         return CallUtil.execute(call);
     }
 
     /**
      * 企业积分发放操作状态查询
      *
-     * @param externalCode
-     * @return
+     * @param externalCode 交易号
+     * @return 发放状态
      */
     public ApiResponse<PointStatus> pointStatus(String externalCode) {
         EnterpriseApi enterpriseApi = retrofitFactory.getApi(EnterpriseApi.class);
@@ -122,42 +122,36 @@ public class GATOpen {
     /**
      * 查询企业资产账户及余额
      *
-     * @param accountOpenid
-     * @param type
-     * @return
+     * @param accountOpenid  账户ID
+     * @param enterpriseCode 公司编码
+     * @param type           账户类型
+     * @return 企业账户信息
      */
-    public ApiResponse<List<EnterpriseAccount>> enterpriseAccount(String accountOpenid, Integer type) {
+    public ApiResponse<List<EnterpriseAccount>> enterpriseAccount(String accountOpenid, String enterpriseCode, Integer type) {
         EnterpriseApi enterpriseApi = retrofitFactory.getApi(EnterpriseApi.class);
-        Call<ApiResponse<List<EnterpriseAccount>>> call = enterpriseApi.enterpriseAccount(accountOpenid, type);
+        Call<ApiResponse<List<EnterpriseAccount>>> call = enterpriseApi.enterpriseAccount(accountOpenid, enterpriseCode, type);
         return CallUtil.execute(call);
     }
 
     /**
      * 企业额度单个发放
      *
-     * @param limitOpenid
-     * @param corpCode
-     * @param amount
-     * @param remark
-     * @param comment
-     * @param externalCode
-     * @return
+     * @param limitAssign 额度发放
+     * @return 交易号
      */
-    public ApiResponse<String> limitAssign(String limitOpenid, String corpCode, BigDecimal amount,
-                                           String remark, String comment, String externalCode) {
-
+    public ApiResponse<String> limitAssign(LimitAssign limitAssign) {
         EnterpriseApi enterpriseApi = retrofitFactory.getApi(EnterpriseApi.class);
-        Call<ApiResponse<String>> call = enterpriseApi
-                .limitAssign(limitOpenid, corpCode, amount,
-                        remark, comment, externalCode);
+        Call<ApiResponse<String>> call = enterpriseApi.limitAssign(limitAssign.getLimitOpenid(),
+                limitAssign.getEnterpriseCode(), limitAssign.getCorpCode(), limitAssign.getAmount(),
+                limitAssign.getRemark(), limitAssign.getComment(), limitAssign.getExternalCode());
         return CallUtil.execute(call);
     }
 
     /**
      * 额度发放状态查询
      *
-     * @param externalCode
-     * @return
+     * @param externalCode 交易号
+     * @return 额度发放状态
      */
     public ApiResponse<LimitStatus> limitStatus(String externalCode) {
         EnterpriseApi enterpriseApi = retrofitFactory.getApi(EnterpriseApi.class);
@@ -168,20 +162,12 @@ public class GATOpen {
     /**
      * 企业额度单个回收
      *
-     * @param limitOpenid
-     * @param corpCode
-     * @param amount
-     * @param remark
-     * @param externalCode
-     * @return
+     * @param limitRecycle 额度回收
+     * @return 交易号
      */
-    public ApiResponse<String> limitRecycle(String limitOpenid,
-                                            String corpCode, BigDecimal amount, String remark,
-                                            String externalCode) {
+    public ApiResponse<String> limitRecycle(LimitRecycle limitRecycle) {
         EnterpriseApi enterpriseApi = retrofitFactory.getApi(EnterpriseApi.class);
-        Call<ApiResponse<String>> call = enterpriseApi
-                .limitRecycle(limitOpenid, corpCode,
-                        amount, remark, externalCode);
+        Call<ApiResponse<String>> call = enterpriseApi.limitRecycle(limitRecycle.getLimitOpenid(), limitRecycle.getEnterpriseCode(), limitRecycle.getCorpCode(), limitRecycle.getAmount(), limitRecycle.getRemark(), limitRecycle.getExternalCode());
         return CallUtil.execute(call);
     }
 
@@ -190,89 +176,111 @@ public class GATOpen {
     /**
      * 添加员工
      *
-     * @param employeeBO
-     * @return
+     * @param employeeBO 员工信息
+     * @return 工号
      */
     public ApiResponse<String> addEmployee(EmployeeBO employeeBO) {
         EmployeeApi employeeApi = retrofitFactory.getApi(EmployeeApi.class);
-        Call<ApiResponse<String>> call = employeeApi
-                .addEmployee(employeeBO.getCorp_code(), employeeBO.getName(), employeeBO.getGender(), employeeBO.getEmail(),
-                        employeeBO.getMobile(), employeeBO.getSend_invite(), employeeBO.getRemark(), employeeBO.getBirth_day(), employeeBO.getEntry_day(), employeeBO.getCard_type(), employeeBO.getCard_no());
+        Call<ApiResponse<String>> call = employeeApi.addEmployee(employeeBO.getEnterpriseCode(),
+                employeeBO.getCorpCode(), employeeBO.getName(), employeeBO.getGender(), employeeBO.getEmail(),
+                employeeBO.getMobile(), employeeBO.getSendInvite(), employeeBO.getRemark(), employeeBO.getDeptCode(),
+                employeeBO.getLevel(), employeeBO.getBirthDay(), employeeBO.getEntryDay(), employeeBO.getCardType(),
+                employeeBO.getCardNo());
         return CallUtil.execute(call);
     }
-
 
     /**
      * 查询员工
      *
-     * @param corpCode
-     * @return
+     * @param enterpriseCode 企业编码
+     * @param corpCode       工号
+     * @return 员工
      */
-    public ApiResponse<Employee> getEmployee(String corpCode) {
+    public ApiResponse<Employee> getEmployee(String enterpriseCode, String corpCode) {
         EmployeeApi employeeApi = retrofitFactory.getApi(EmployeeApi.class);
-        Call<ApiResponse<Employee>> call = employeeApi.getEmployee(corpCode);
+        Call<ApiResponse<Employee>> call = employeeApi.getEmployee(enterpriseCode, corpCode);
         return CallUtil.execute(call);
     }
 
     /**
      * 更新员工
      *
-     * @param employeeBO
-     * @param newCorpcode
-     * @return
+     * @param employeeBO  员工信息
+     * @param newCorpcode 新的工号
+     * @return 工号
      */
     public ApiResponse<String> updateEmployee(EmployeeBO employeeBO, String newCorpcode) {
-        EmployeeApi employeeApi = (EmployeeApi) this.retrofitFactory.getApi(EmployeeApi.class);
-        Call<ApiResponse<String>> call = employeeApi.updateEmployee(employeeBO.getCorp_code(), employeeBO.getName(), employeeBO.getGender(), employeeBO.getEmail(), employeeBO.getMobile(), employeeBO.getRemark(), employeeBO.getDept_code(), employeeBO.getLevel(), employeeBO.getBirth_day(), employeeBO.getEntry_day(), employeeBO.getCard_type(), employeeBO.getCard_no(), newCorpcode);
+        EmployeeApi employeeApi = retrofitFactory.getApi(EmployeeApi.class);
+        Call<ApiResponse<String>> call = employeeApi.updateEmployee(employeeBO.getEnterpriseCode(), employeeBO.getCorpCode(),
+                employeeBO.getName(), employeeBO.getGender(), employeeBO.getEmail(), employeeBO.getMobile(),
+                employeeBO.getRemark(), employeeBO.getDeptCode(), employeeBO.getLevel(), employeeBO.getBirthDay(),
+                employeeBO.getEntryDay(), employeeBO.getCardType(), employeeBO.getCardNo(), newCorpcode);
         return CallUtil.execute(call);
     }
 
     /**
      * 员工离职
      *
-     * @param corpCode
-     * @return
+     * @param enterpriseCode 公司编码
+     * @param corpCode       工号
+     * @return 工号
      */
-    public ApiResponse<String> resignEmployee(String corpCode) {
+    public ApiResponse<String> resignEmployee(String enterpriseCode, String corpCode) {
         EmployeeApi employeeApi = retrofitFactory.getApi(EmployeeApi.class);
-        Call<ApiResponse<String>> call = employeeApi.resignEmployee(corpCode);
+        Call<ApiResponse<String>> call = employeeApi.resignEmployee(enterpriseCode, corpCode);
         return CallUtil.execute(call);
     }
 
     /**
      * 离职员工复职
      *
-     * @param corpCode
-     * @return
+     * @param enterpriseCode 公司编号
+     * @param corpCode       工号
+     * @return result
      */
-    public ApiResponse<String> restoreEmployee(String corpCode) {
+    public ApiResponse<String> restoreEmployee(String enterpriseCode, String corpCode) {
         EmployeeApi employeeApi = retrofitFactory.getApi(EmployeeApi.class);
-        Call<ApiResponse<String>> call = employeeApi.restoreEmployee(corpCode);
+        Call<ApiResponse<String>> call = employeeApi.restoreEmployee(enterpriseCode, corpCode);
+        return CallUtil.execute(call);
+    }
+
+    /**
+     * 集团下员工在不同企业调转
+     *
+     * @param enterpriseCode 公司编号
+     * @param corpCode       工号
+     * @return result
+     */
+    public ApiResponse<String> transferEmployee(String corpCode, String enterpriseCode, String newEnterpriseCode) {
+        EmployeeApi employeeApi = retrofitFactory.getApi(EmployeeApi.class);
+        Call<ApiResponse<String>> call = employeeApi.transferEmployee(enterpriseCode, corpCode, newEnterpriseCode);
         return CallUtil.execute(call);
     }
 
     /**
      * 批量查询员工
      *
-     * @param pageIndex
-     * @param pageSize
-     * @return
+     * @param enterpriseCode 公司编号
+     * @param pageIndex      页码
+     * @param pageSize       每页数量
+     * @return result
      */
-    public ApiResponse<BatchModel<Employee>> batchEmployee(Integer pageIndex, Integer pageSize) {
+    public ApiResponse<BatchModel<Employee>> batchEmployee(String enterpriseCode, Integer pageIndex, Integer pageSize) {
         EmployeeApi employeeApi = retrofitFactory.getApi(EmployeeApi.class);
-        Call<ApiResponse<BatchModel<Employee>>> call = employeeApi.batchEmployee(pageIndex, pageSize);
+        Call<ApiResponse<BatchModel<Employee>>> call = employeeApi.batchEmployee(enterpriseCode, pageIndex, pageSize);
         return CallUtil.execute(call);
     }
 
     /**
      * 查询员工账户
      *
-     * @param corpCode
-     * @return
+     * @param enterpriseCode 公司编号
+     * @param corpCode       工号
+     * @return list
      */
-    public ApiResponse<List<EmployeeAccount>> accountEmployee(String corpCode) {
+    public ApiResponse<List<EmployeeAccount>> accountEmployee(String enterpriseCode, String corpCode) {
         EmployeeApi employeeApi = retrofitFactory.getApi(EmployeeApi.class);
-        Call<ApiResponse<List<EmployeeAccount>>> call = employeeApi.accountEmployee(corpCode);
+        Call<ApiResponse<List<EmployeeAccount>>> call = employeeApi.accountEmployee(enterpriseCode, corpCode);
         return CallUtil.execute(call);
     }
 
@@ -281,12 +289,13 @@ public class GATOpen {
     /**
      * 根据手机号登录
      *
-     * @param mobile
-     * @return
+     * @param enterpriseCode 公司编号
+     * @param mobile         手机号
+     * @return result
      */
-    public ApiResponse<String> loginByMobile(String mobile) {
+    public ApiResponse<String> loginByMobile(String enterpriseCode, String mobile) {
         LoginApi loginApi = retrofitFactory.getApi(LoginApi.class);
-        Call<ApiResponse<String>> call = loginApi.loginByMobile(mobile);
+        Call<ApiResponse<String>> call = loginApi.loginByMobile(enterpriseCode, mobile);
         return CallUtil.execute(call);
     }
 
@@ -296,9 +305,9 @@ public class GATOpen {
      * @param corpCode 工号
      * @return
      */
-    public ApiResponse<String> loginByCorpCode(String corpCode) {
+    public ApiResponse<String> loginByCorpCode(String enterpriseCode, String corpCode) {
         LoginApi loginApi = retrofitFactory.getApi(LoginApi.class);
-        Call<ApiResponse<String>> call = loginApi.loginByCorpCode(corpCode);
+        Call<ApiResponse<String>> call = loginApi.loginByCorpCode(enterpriseCode, corpCode);
         return CallUtil.execute(call);
     }
 
@@ -350,6 +359,27 @@ public class GATOpen {
         HelperApi helperApi = retrofitFactory.getApi(HelperApi.class);
         Call<ApiResponse<String>> call = helperApi.checkApp(appid);
         return CallUtil.execute(call);
+    }
+
+    // ====  拼接URL ====
+
+    /**
+     * 根据规则拼接URL
+     *
+     * @param authCode    授权码(必填)
+     * @param redirectUrl 重定向地址(非必填)
+     * @return 重定向URL
+     * @throws UnsupportedEncodingException
+     */
+    public String loginUrl(String authCode, String redirectUrl) throws UnsupportedEncodingException {
+        Map<String, Object> params = new HashMap<String, Object>(4);
+        params.put("access_token", GATTokenService.getGatToken());
+        params.put("auth_code", authCode);
+        params.put("timestamp", System.currentTimeMillis() / 1000);
+        params.put("redirect_url", redirectUrl);
+        params.put("sign", SignUtil.sign(params));
+        params.remove("appsecret");
+        return UrlBuildUtil.build(GATOpenConstant.base_url + "/sso/employee/login", params);
     }
 
 

@@ -21,7 +21,7 @@ public class SignUtil {
         params.put("appsecret", GATOpenConstant.appSecret);
         StringBuilder stringBuilder = new StringBuilder();
         for (Map.Entry<String, Object> entry : params.entrySet()) {
-            if (StringUtils.isBlank(entry.getValue().toString())){
+            if (entry.getValue() == null||StringUtils.isBlank(entry.getValue().toString())) {
                 continue;
             }
             stringBuilder.append(entry.getKey().trim());
