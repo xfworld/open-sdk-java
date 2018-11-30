@@ -1,0 +1,27 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+group = 'com.ciicgat.open'
+version = '1.0.3'
+
+description = """open-sdk-java"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+[compileJava, javadoc, compileTestJava]*.options*.encoding = 'UTF-8'
+
+
+repositories {
+
+     maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+     maven { url "http://repo.maven.apache.org/maven2" }
+}
+dependencies {
+    compile group: 'com.squareup.retrofit2', name: 'retrofit', version:'2.3.0'
+    compile group: 'com.squareup.retrofit2', name: 'converter-jackson', version:'2.3.0'
+    compile group: 'com.squareup.okhttp3', name: 'logging-interceptor', version:'3.8.1'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version:'2.9.2'
+    compile group: 'commons-codec', name: 'commons-codec', version:'1.10'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.4'
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+}
